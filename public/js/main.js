@@ -1,4 +1,4 @@
-const ngrok_url = "http://6f81-2001-4200-7000-9-34f1-3d30-ee20-5218.ngrok.io";
+const ngrok_url = "http://3556-105-224-62-47.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkwKKnVybjp0cmluc2ljOndhbGxldHM6VW45TGpFNUVjN0ZCUFRvNzFURFpVQSIedXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpkZWZhdWx0GjCAevCcnadUa3HuncGb_YN6BFwU-jgBzgZZHR4hABloaRWyEVo2T1uqFz0lOTWSrf0iAA"
 let select_template_id = null;
 
@@ -105,6 +105,7 @@ async function get_template_json(template_id) {
 	});
 }
 // ------------------------------
+// submit button click
 $("#show_fields").submit(function (e) {
 	e.preventDefault();
 
@@ -112,9 +113,8 @@ $("#show_fields").submit(function (e) {
 	const arr = transform_rows_to_object($(this).serializeArray());
 
 	if(validate_form()) {
-		console.log('send data to server');
-		console.log(select_template_id);
-		send_data_to_server(select_template_id, arr);
+		// send to server
+		send_data_to_server($("#account_email").val(), select_template_id, arr);
 	}
 });
 
@@ -147,11 +147,14 @@ function validate_form() {
 
 
 // ------------------------------
-async function send_data_to_server(template_id, credential_values) {
+async function send_data_to_server(account_email, template_id, credential_values) {
 	let data = {};
 
 	data['auth_token'] = auth_token;
 	
+	// emaill address to store credential against
+	data['account_email'] =  account_email;
+
 	// get select option value
 	data['template_id'] = template_id;
 
@@ -166,13 +169,11 @@ async function send_data_to_server(template_id, credential_values) {
 		url: `${ngrok_url}/createCredential`,
 		type: "POST",
 		success: function (result) {
-			console.log(result);
-			const data = JSON.parse(result.documentJson);
 			console.log(data);
-			show_modal('Credential was created successfully!', '<p class="text-break">' + result.documentJson + '</p> was created successfully');
+			show_modal('Credential was created successfully!', 'Credential ID: <p class="text-break"><i>' + result.itemId + '</i></p>');
 		},
 		error: function(result) {
-			show_modal('Error', 'Credential is already stored against users wallet.');
+			show_modal('Error', 'Server could not complete request.');
 		}
 	});
 }
@@ -183,7 +184,7 @@ async function send_data_to_server(template_id, credential_values) {
 function build_select_field_type(data) {
 	let arr = [];
 	arr.push("<div>");
-	arr.push("<label class='form-label'>Select Credential Template ID</label>");
+	arr.push("<label class='form-label'>Select Credential Template</label>");
 	arr.push("<select id='select_template_id' class='form-select template-field form-control' name='type' required data-live-search='true'>");
 	for (let i = 0; i < data.length; i++) {
 		arr.push("<option value='" + data[i].id + "'>" + data[i].id + "</option>");
