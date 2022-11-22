@@ -1,4 +1,4 @@
-const ngrok_url = "http://b9f0-2001-4200-7000-9-34f1-3d30-ee20-5218.ngrok.io";
+const ngrok_url = "http://6f81-2001-4200-7000-9-34f1-3d30-ee20-5218.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkwKKnVybjp0cmluc2ljOndhbGxldHM6VW45TGpFNUVjN0ZCUFRvNzFURFpVQSIedXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpkZWZhdWx0GjCAevCcnadUa3HuncGb_YN6BFwU-jgBzgZZHR4hABloaRWyEVo2T1uqFz0lOTWSrf0iAA"
 let select_template_id = null;
 
@@ -108,6 +108,7 @@ async function get_template_json(template_id) {
 $("#show_fields").submit(function (e) {
 	e.preventDefault();
 
+	// create object array send to server
 	const arr = transform_rows_to_object($(this).serializeArray());
 
 	if(validate_form()) {
@@ -120,13 +121,13 @@ $("#show_fields").submit(function (e) {
 // ------------------------------
 function transform_rows_to_object(arr) {
 	// group three rows and create row object
-	let new_obj_arr = []
+	let obj = {}
 
 	arr.forEach(element => {
-		new_obj_arr.push({[element.name]: element.value});
+		obj[element.name] = element.value;
 	});
 
-	return new_obj_arr;
+	return obj;
 }
 
 
@@ -157,7 +158,7 @@ async function send_data_to_server(template_id, credential_values) {
 	// { field_name: value, field_name: value, ... }
 	data['credential_values'] = JSON.stringify(credential_values)
 
-	console.log(credential_values);
+	console.log(data['credential_values']);
 
 	$.ajax({
 		dataType: 'json',
@@ -166,10 +167,13 @@ async function send_data_to_server(template_id, credential_values) {
 		type: "POST",
 		success: function (result) {
 			console.log(result);
-			const data = JSON.parse(result.valuesJson);
+			const data = JSON.parse(result.documentJson);
 			console.log(data);
-			show_modal('Success', '<b>' + data + '</b> was created successfully');
+			show_modal('Credential was created successfully!', '<p class="text-break">' + result.documentJson + '</p> was created successfully');
 		},
+		error: function(result) {
+			show_modal('Error', 'Credential is already stored against users wallet.');
+		}
 	});
 }
 
@@ -180,7 +184,7 @@ function build_select_field_type(data) {
 	let arr = [];
 	arr.push("<div>");
 	arr.push("<label class='form-label'>Select Credential Template ID</label>");
-	arr.push("<select id='select_template_id' class='form-select template-field form-control' name='type' required >");
+	arr.push("<select id='select_template_id' class='form-select template-field form-control' name='type' required data-live-search='true'>");
 	for (let i = 0; i < data.length; i++) {
 		arr.push("<option value='" + data[i].id + "'>" + data[i].id + "</option>");
 	}
