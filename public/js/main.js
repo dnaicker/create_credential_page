@@ -1,5 +1,6 @@
-const ngrok_url = "http://09dc-41-13-108-83.ngrok.io";
+const ngrok_url = "http://b9f0-2001-4200-7000-9-34f1-3d30-ee20-5218.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkwKKnVybjp0cmluc2ljOndhbGxldHM6VW45TGpFNUVjN0ZCUFRvNzFURFpVQSIedXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpkZWZhdWx0GjCAevCcnadUa3HuncGb_YN6BFwU-jgBzgZZHR4hABloaRWyEVo2T1uqFz0lOTWSrf0iAA"
+let select_template_id = null;
 
 // ------------------------------
 // on load
@@ -32,8 +33,7 @@ async function load_template_ids() {
 			// add event handler to selection options
 			$("#select_template_id").change(function(e) {
 				$("#show_fields").empty();
-
-				console.log(this.value);
+				select_template_id = this.value;	
 				get_template_json(this.value);
 			});
 		},
@@ -57,7 +57,6 @@ function build_ui(data) {
 	}
 	arr.push('<button input id="submit" type="submit" class="btn btn-lg btn-block btn-primary" style="margin-bottom: 10px; margin-top: 20px; width: 100%"><i class="fa-solid fa-check" style="margin-right: 10px"></i>Save</button>');
 	$("#show_fields").append(arr.join(""));
-	console.log(arr);
 }
 
 // ------------------------------
@@ -100,7 +99,6 @@ async function get_template_json(template_id) {
 		url: `${ngrok_url}/getCredentialTemplate`,
 		type: "POST",
 		success: function (result) {
-			console.log(result);
 			// build ui
 			build_ui(result);
 		},
@@ -108,35 +106,24 @@ async function get_template_json(template_id) {
 }
 // ------------------------------
 $("#show_fields").submit(function (e) {
-	console.log('clicked');
 	e.preventDefault();
+
 	const arr = transform_rows_to_object($(this).serializeArray());
-	console.log(arr);
+
 	if(validate_form()) {
-		// send_data_to_server(arr);
+		console.log('send data to server');
+		console.log(select_template_id);
+		send_data_to_server(select_template_id, arr);
 	}
 });
 
 // ------------------------------
 function transform_rows_to_object(arr) {
 	// group three rows and create row object
-	let count = 0;
-	let new_obj = {}
 	let new_obj_arr = []
 
 	arr.forEach(element => {
-
-		new_obj[element.name] = element.value;
-
-		if (count >= 2) {
-			count = 0;
-			new_obj_arr.push(new_obj);
-			new_obj = {};
-			return;
-		}
-
-		count++;
-
+		new_obj_arr.push({[element.name]: element.value});
 	});
 
 	return new_obj_arr;
@@ -159,25 +146,29 @@ function validate_form() {
 
 
 // ------------------------------
-async function save_credential_values() {
+async function send_data_to_server(template_id, credential_values) {
 	let data = {};
 
 	data['auth_token'] = auth_token;
 	
 	// get select option value
-	data['template_id'] = "";
+	data['template_id'] = template_id;
 
 	// { field_name: value, field_name: value, ... }
-	data['credential_values'] = ""	
+	data['credential_values'] = JSON.stringify(credential_values)
+
+	console.log(credential_values);
 
 	$.ajax({
 		dataType: 'json',
 		data: data,
-		url: `${ngrok_url}/insertCredentialTemplateValues`,
+		url: `${ngrok_url}/createCredential`,
 		type: "POST",
 		success: function (result) {
 			console.log(result);
-			show_modal('Success', '<b>' + result + '</b> was created successfully');
+			const data = JSON.parse(result.valuesJson);
+			console.log(data);
+			show_modal('Success', '<b>' + data + '</b> was created successfully');
 		},
 	});
 }
