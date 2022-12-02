@@ -1,4 +1,4 @@
-const ngrok_url = "http://3556-105-224-62-47.ngrok.io";
+const ngrok_url = "http://6263-146-64-79-183.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkwKKnVybjp0cmluc2ljOndhbGxldHM6VW45TGpFNUVjN0ZCUFRvNzFURFpVQSIedXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpkZWZhdWx0GjCAevCcnadUa3HuncGb_YN6BFwU-jgBzgZZHR4hABloaRWyEVo2T1uqFz0lOTWSrf0iAA"
 let select_template_id = null;
 
@@ -170,7 +170,7 @@ async function send_data_to_server(account_email, template_id, credential_values
 		type: "POST",
 		success: function (result) {
 			console.log(data);
-			show_modal('Credential was created successfully!', 'Credential ID: <p class="text-break"><i>' + result.itemId + '</i></p>');
+			show_modal('Credential was created successfully!', '<p>Credential ID: <b>' + result.itemId + '</b></p>');
 		},
 		error: function(result) {
 			show_modal('Error', 'Server could not complete request.');
