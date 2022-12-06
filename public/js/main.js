@@ -1,5 +1,5 @@
 const ngrok_url = "http://2fd6-2001-4200-7000-9-5db-c11b-2268-da25.ngrok.io";
-const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkwKKnVybjp0cmluc2ljOndhbGxldHM6VW45TGpFNUVjN0ZCUFRvNzFURFpVQSIedXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpkZWZhdWx0GjCAevCcnadUa3HuncGb_YN6BFwU-jgBzgZZHR4hABloaRWyEVo2T1uqFz0lOTWSrf0iAA"
+const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkkKKnVybjp0cmluc2ljOndhbGxldHM6N1VwRmtIUEdvektWUWNFSHVLYVZ3TSIbdXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpDU0lSGjCTwP0t3e2BdAKnkSjJIJN1HMwlexAmvYBUGBzR_DEFkGZebj-IdHu48JKhMrjBdegiAA"
 let select_template_id = null;
 
 // ------------------------------
@@ -66,14 +66,14 @@ function build_ui(data) {
 function build_ui_input(field) {
 	let arr = [];
 
-	if (field.optional) {
+	if (!field.optional) {
 		arr.push('<span class="badge bg-primary" style="margin-right: 10px; margin-top: 10px; margin-bottom: 5px">Required</span>');
 	} else {
 		arr.push('<span class="badge bg-secondary" style="margin-right: 10px; margin-top: 10px; margin-bottom: 5px">Optional</span>');
 	}
 	arr.push(`<div class='form-floating'>`);
-	arr.push(`<input type='${get_field_type_name(field.type)}' class='form-control template-field' name='${field.name}' id='${field.name}' placeholder='${field.description === '' ? field.name : field.description}' ${field.optional ? "required" : ""} style="margin-bottom: 10px;">`);
-	arr.push(`<label class='form-label'>${field.description === '' ? field.name : field.description}</label>`);
+	arr.push(`<input type='${get_field_type_name(field.type)}' class='form-control template-field' name='${field.name}' id='${field.name}' placeholder='${field.description === '' ? field.name : field.description}' ${!field.optional ? "required" : ""} style="margin-bottom: 10px;">`);
+	arr.push(`<label class='form-label'>${field.name}</label>`);
 	arr.push(`</div>`);
 
 	console.log(arr.join(``));
