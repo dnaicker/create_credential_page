@@ -1,4 +1,4 @@
-const ngrok_url = "http://6263-146-64-79-183.ngrok.io";
+const ngrok_url = "http://2fd6-2001-4200-7000-9-5db-c11b-2268-da25.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkwKKnVybjp0cmluc2ljOndhbGxldHM6VW45TGpFNUVjN0ZCUFRvNzFURFpVQSIedXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpkZWZhdWx0GjCAevCcnadUa3HuncGb_YN6BFwU-jgBzgZZHR4hABloaRWyEVo2T1uqFz0lOTWSrf0iAA"
 let select_template_id = null;
 
@@ -48,6 +48,8 @@ function build_ui(data) {
 	for(let field in data.template.fields) {
 		let obj = {};
 
+		console.log(field, data.template.fields[field].description, data.template.fields[field].optional, data.template.fields[field].type)
+
 		obj['name'] = field;
 		obj['description'] = data.template.fields[field].description;
 		obj['optional'] = data.template.fields[field].optional;
@@ -55,7 +57,8 @@ function build_ui(data) {
 
 		arr.push(build_ui_input(obj));
 	}
-	arr.push('<button input id="submit" type="submit" class="btn btn-lg btn-block btn-primary" style="margin-bottom: 10px; margin-top: 20px; width: 100%"><i class="fa-solid fa-check" style="margin-right: 10px"></i>Save</button>');
+	// add button
+	arr.push('<div class="form-floating"><button input id="submit" type="submit" class="btn btn-lg btn-block btn-primary" style="margin-bottom: 10px; margin-top: 20px; width: 100%"><i class="fa-solid fa-check" style="margin-right: 10px"></i>Save</button></div>');
 	$("#show_fields").append(arr.join(""));
 }
 
@@ -63,12 +66,13 @@ function build_ui(data) {
 function build_ui_input(field) {
 	let arr = [];
 
-	arr.push("<div class='form-floating'>");
-	arr.push(`<input type='${get_field_type_name(field.type)}' class='form-control template-field' name='${field.name}' id='${field.name}' placeholder='${field.description}' required style="margin-bottom: 10px;>`);
-	arr.push(`<label class='form-label'>${field.description}</label>`);
-	arr.push("</div>");
+	arr.push(`<div class='form-floating'>`);
+	arr.push(`<input type='${get_field_type_name(field.type)}' class='form-control template-field' name='${field.name}' id='${field.name}' placeholder='${field.description === '' ? field.name : field.description}' required style="margin-bottom: 10px;">`);
+	arr.push(`<label class='form-label'>${field.description === '' ? field.name : field.description}</label>`);
+	arr.push(`</div>`);
 
-	return arr.join("");
+	console.log(arr.join(``));
+	return arr.join(``);
 }
 
 function get_field_type_name(field_type_numeric_value) {
@@ -99,6 +103,7 @@ async function get_template_json(template_id) {
 		url: `${ngrok_url}/getCredentialTemplate`,
 		type: "POST",
 		success: function (result) {
+			console.log('template', result);
 			// build ui
 			build_ui(result);
 		},
