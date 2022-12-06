@@ -66,8 +66,13 @@ function build_ui(data) {
 function build_ui_input(field) {
 	let arr = [];
 
+	if (field.optional) {
+		arr.push('<span class="badge bg-primary" style="margin-right: 10px; margin-top: 10px; margin-bottom: 5px">Required</span>');
+	} else {
+		arr.push('<span class="badge bg-secondary" style="margin-right: 10px; margin-top: 10px; margin-bottom: 5px">Optional</span>');
+	}
 	arr.push(`<div class='form-floating'>`);
-	arr.push(`<input type='${get_field_type_name(field.type)}' class='form-control template-field' name='${field.name}' id='${field.name}' placeholder='${field.description === '' ? field.name : field.description}' required style="margin-bottom: 10px;">`);
+	arr.push(`<input type='${get_field_type_name(field.type)}' class='form-control template-field' name='${field.name}' id='${field.name}' placeholder='${field.description === '' ? field.name : field.description}' ${field.optional ? "required" : ""} style="margin-bottom: 10px;">`);
 	arr.push(`<label class='form-label'>${field.description === '' ? field.name : field.description}</label>`);
 	arr.push(`</div>`);
 
