@@ -213,7 +213,7 @@ async function send_data_to_server(template_id, credential_values) {
 		type: "POST",
 		success: function (result) {
 
-			show_save_modal('Credential Save', build_credential_save_modal(credential_values, result.documentJson), credential_values);
+			show_save_modal('Credential Save', build_credential_save_modal(credential_values, result), credential_values);
 
 
 			// const display_result = loop_through_data(JSON.parse(result.documentJson), []);
@@ -274,13 +274,15 @@ function build_credential_save_modal(data, credential_json) {
 	arr.push("<p><u>Option 1: Send to email address</u></p>");
 	// add email input field
 	arr.push(build_for_email(data));
-	arr.push("<p><u>Option 2: Download using QR Code</u></p>");
+	arr.push("<p><u>Option 2: Download using QR Code to mobile wallet</u></p>");
 	// add qr code image
-	arr.push("<img src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + JSON.stringify(data) + "' alt='qr code' />");
-	arr.push("<p><u>Option 3: Copy URL and paste into wallet</u></p>");
+	// todo find a better way to generate qr code
+	
+	arr.push("<p><img src='https://chart.googleapis.com/chart?cht=qr&chl="+ credential_json + "&chs=200x200&chld=L|1' alt='qr code' /><p>");
+	arr.push("<p><a href='data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(credential_json))+"' download='credential.json' target='_blank'>Option 3: Download credential as JSON</a></p>");
 	arr.push("<p><u>Option 4: Download credential as PDF</u></p>");
 	arr.push("<p><u>Option 5: Copy credential to clipboard</u></p>");
-	arr.push("<p style='overflow-wrap: break-word;'><i>"+credential_json+"<i></p>");
+	arr.push("<p style='overflow-wrap: break-word;'><i>"+JSON.stringify(credential_json)+"<i></p>");
 	arr.push("</div>");
 
 	return arr.join("");
