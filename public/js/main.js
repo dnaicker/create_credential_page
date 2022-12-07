@@ -1,16 +1,24 @@
-const ngrok_url = "http://2fd6-2001-4200-7000-9-5db-c11b-2268-da25.ngrok.io";
+const ngrok_url = "http://67e7-105-224-242-34.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkkKKnVybjp0cmluc2ljOndhbGxldHM6N1VwRmtIUEdvektWUWNFSHVLYVZ3TSIbdXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpDU0lSGjCTwP0t3e2BdAKnkSjJIJN1HMwlexAmvYBUGBzR_DEFkGZebj-IdHu48JKhMrjBdegiAA"
 let select_template_id = null;
 
 // ------------------------------
 // on load
-$(document).ready(function () { 
-	$( "#modal_load" ).load( "modal.html" );
+$(document).ready(function () {
+	$("#modal_load").load("modal.html");
 	// create dropdown of template ids
 	load_template_ids();
 });
 
 // ------------------------------
+function generate_qr_code() {
+	let arr = [];
+
+
+
+	return arr.join("");
+}
+
 
 
 // ------------------------------
@@ -29,11 +37,11 @@ async function load_template_ids() {
 		success: function (result) {
 			// build select options with template ids
 			$("#template_id").append(build_select_field_type(JSON.parse(result.itemsJson)));
-			
+
 			// add event handler to selection options
-			$("#select_template_id").change(function(e) {
+			$("#select_template_id").change(function (e) {
 				$("#show_fields").empty();
-				select_template_id = this.value;	
+				select_template_id = this.value;
 				get_template_json(this.value);
 			});
 		},
@@ -45,10 +53,8 @@ function build_ui(data) {
 	let arr = [];
 
 	// build ui
-	for(let field in data.template.fields) {
+	for (let field in data.template.fields) {
 		let obj = {};
-
-		console.log(field, data.template.fields[field].description, data.template.fields[field].optional, data.template.fields[field].type)
 
 		obj['name'] = field;
 		obj['description'] = data.template.fields[field].description;
@@ -76,7 +82,6 @@ function build_ui_input(field) {
 	arr.push(`<label class='form-label'>${field.name}</label>`);
 	arr.push(`</div>`);
 
-	console.log(arr.join(``));
 	return arr.join(``);
 }
 
@@ -100,31 +105,32 @@ async function get_template_json(template_id) {
 	const data = {};
 
 	data['auth_token'] = auth_token;
-	
+
 	data['id'] = template_id;
-	
+
 	$.ajax({
 		data: data,
 		url: `${ngrok_url}/getCredentialTemplate`,
 		type: "POST",
 		success: function (result) {
-			console.log('template', result);
 			// build ui
 			build_ui(result);
 		},
 	});
 }
 // ------------------------------
+// ** important step
 // submit button click
-$("#show_fields").submit(function (e) {
+$("#show_fields").submit(async function (e) {
 	e.preventDefault();
 
 	// create object array send to server
 	const arr = transform_rows_to_object($(this).serializeArray());
 
-	if(validate_form()) {
-		// send to server
-		send_data_to_server($("#account_email").val(), select_template_id, arr);
+	if (validate_form()) {
+
+		// create credential
+		send_data_to_server(select_template_id, arr);
 	}
 });
 
@@ -146,7 +152,7 @@ function transform_rows_to_object(arr) {
 function validate_form() {
 	const credential_template_form = document.getElementById('show_fields')
 	credential_template_form.classList.add('was-validated');
-	
+
 	if (credential_template_form.checkValidity() === false) {
 		show_modal('Error', 'Please complete all input fields.');
 		return false;
@@ -161,9 +167,9 @@ async function send_data_to_server(account_email, template_id, credential_values
 	let data = {};
 
 	data['auth_token'] = auth_token;
-	
+
 	// emaill address to store credential against
-	data['account_email'] =  account_email;
+	data['account_email'] = account_email;
 
 	// get select option value
 	data['template_id'] = template_id;
@@ -171,7 +177,34 @@ async function send_data_to_server(account_email, template_id, credential_values
 	// { field_name: value, field_name: value, ... }
 	data['credential_values'] = JSON.stringify(credential_values)
 
-	console.log(data['credential_values']);
+
+	$.ajax({
+		dataType: 'json',
+		data: data,
+		url: `${ngrok_url}/createCredentialWithEmail`,
+		type: "POST",
+		success: function (result) {
+			console.log(result);
+			return result;
+		},
+		error: function (result) {
+			show_modal('Error', 'Server could not complete request.');
+		}
+	});
+}
+
+// ------------------------------
+// overlaod function without account_email
+async function send_data_to_server(template_id, credential_values) {
+	let data = {};
+
+	data['auth_token'] = auth_token;
+
+	// get select option value
+	data['template_id'] = template_id;
+
+	// { field_name: value, field_name: value, ... }
+	data['credential_values'] = JSON.stringify(credential_values)
 
 	$.ajax({
 		dataType: 'json',
@@ -179,10 +212,15 @@ async function send_data_to_server(account_email, template_id, credential_values
 		url: `${ngrok_url}/createCredential`,
 		type: "POST",
 		success: function (result) {
-			console.log(data);
-			show_modal('Credential was created successfully!', '<p>Credential ID: <b>' + result.itemId + '</b></p>');
+
+			show_save_modal('Credential Save', build_credential_save_modal(credential_values, result.documentJson), credential_values);
+
+
+			// const display_result = loop_through_data(JSON.parse(result.documentJson), []);
+
+			// show_modal('Credential was created successfully!', '<p><b>Credential Document:</b> <p> ' + result.documentJson + '<p></p>');
 		},
-		error: function(result) {
+		error: function (result) {
 			show_modal('Error', 'Server could not complete request.');
 		}
 	});
@@ -191,10 +229,68 @@ async function send_data_to_server(account_email, template_id, credential_values
 // ==============================
 
 // ------------------------------
+function loop_through_data(data, arr) {
+	$.each(data, function (key, value) {
+		if (typeof value === 'object') {
+			arr.push('<p><b>' + key + ':</b></p>');
+			$.each(value, function (idx, val) {
+				if (typeof idx === 'number') {
+					arr.push('<li>' + val + '</li>')
+				} else {
+					arr.push('<li><u>' + idx + '</u>: ' + val + '</li>')
+				}
+			});
+			arr.push('<br/>')
+		} else {
+			arr.push('<p><b>' + key + ':</b> ' + value + '</p>')
+		}
+	})
+	return arr;
+}
+
+
+// ------------------------------
+function build_for_email(data) {
+	let arr = [];
+
+
+	arr.push('<p>This will associate the credential to your account email address rather than send an email notification with credential.</p>');
+	arr.push('<div class="input-group mb-3">');
+	arr.push('<input type="text" class="form-control outline-primary" id="account_email" placeholder="dnaicker@gmail.com" value="dnaicker@gmail.com">');
+	arr.push('<button class="btn btn-outline-primary" type="button" id="send_email">Send</button>');
+	arr.push('</div>');
+
+
+	return arr.join("");
+}
+
+// ------------------------------
+function build_credential_save_modal(data, credential_json) {
+	let arr = [];
+
+	console.log(credential_json);
+
+	arr.push("<div>");
+	arr.push("<p><u>Option 1: Send to email address</u></p>");
+	// add email input field
+	arr.push(build_for_email(data));
+	arr.push("<p><u>Option 2: Download using QR Code</u></p>");
+	// add qr code image
+	arr.push("<img src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + JSON.stringify(data) + "' alt='qr code' />");
+	arr.push("<p><u>Option 3: Copy URL and paste into wallet</u></p>");
+	arr.push("<p><u>Option 4: Download credential as PDF</u></p>");
+	arr.push("<p><u>Option 5: Copy credential to clipboard</u></p>");
+	arr.push("<p style='overflow-wrap: break-word;'><i>"+credential_json+"<i></p>");
+	arr.push("</div>");
+
+	return arr.join("");
+}
+
+// ------------------------------
 function build_select_field_type(data) {
 	let arr = [];
 	arr.push("<div>");
-	arr.push("<label class='form-label'>Select Credential Template</label>");
+	arr.push("<label class='form-label'>Select Template</label>");
 	arr.push("<select id='select_template_id' class='form-select template-field form-control' name='type' required data-live-search='true'>");
 	for (let i = 0; i < data.length; i++) {
 		arr.push("<option value='" + data[i].id + "'>" + data[i].id + "</option>");
@@ -205,9 +301,23 @@ function build_select_field_type(data) {
 }
 
 // ------------------------------
+function show_save_modal(header, body, data) {
+	$("#save_modal_header")[0].innerHTML = header;
+	$("#save_modal_body")[0].innerHTML = "<p>" + body + "</p>";
+	$("#save_modal").modal('show');
+
+	// attach button event handlers after 
+	$("#send_email").on("click", function (e, target, value) {
+		console.log('send email')
+		// send to server
+		send_data_to_server($("#account_email").val(), select_template_id, data);
+	});
+}
+
+// ------------------------------
 function show_modal(header, body) {
 	$("#modal_header")[0].innerHTML = header;
-	$("#modal_body")[0].innerHTML = "<p>" + body + "</p>";
+	$("#modal_body")[0].innerHTML = "<p style=''>" + body + "</p>";
 	$("#modal").modal('show');
 }
 
