@@ -1,4 +1,4 @@
-const ngrok_url = "http://67e7-105-224-242-34.ngrok.io";
+const ngrok_url = "http://a647-105-224-28-203.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkkKKnVybjp0cmluc2ljOndhbGxldHM6N1VwRmtIUEdvektWUWNFSHVLYVZ3TSIbdXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpDU0lSGjCTwP0t3e2BdAKnkSjJIJN1HMwlexAmvYBUGBzR_DEFkGZebj-IdHu48JKhMrjBdegiAA"
 let select_template_id = null;
 
@@ -185,7 +185,7 @@ async function send_data_to_server(account_email, template_id, credential_values
 		type: "POST",
 		success: function (result) {
 			console.log(result);
-			return result;
+			show_modal('Credential was created successfully!', '<p><b>Credential Document:</b> <p> ' + result + '<p></p>');
 		},
 		error: function (result) {
 			show_modal('Error', 'Server could not complete request.');
@@ -214,6 +214,8 @@ async function send_data_to_server(template_id, credential_values) {
 		success: function (result) {
 
 			show_save_modal('Credential Save', build_credential_save_modal(credential_values, result), credential_values);
+
+
 
 
 			// const display_result = loop_through_data(JSON.parse(result.documentJson), []);
@@ -279,10 +281,12 @@ function build_credential_save_modal(data, credential_json) {
 	// todo find a better way to generate qr code
 	
 	arr.push("<p><img src='https://chart.googleapis.com/chart?cht=qr&chl="+ credential_json + "&chs=200x200&chld=L|1' alt='qr code' /><p>");
-	arr.push("<p><a href='data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(credential_json))+"' download='credential.json' target='_blank'>Option 3: Download credential as JSON</a></p>");
+	arr.push("<p><u>Option 3: Download credential as JSON</u></p>");
+	arr.push("<p><a class='btn btn-primary' href='data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(credential_json))+"' download='credential.json' target='_blank'><i class='fa-solid fa-scroll icon-spacing'></i>Download Credential JSON</a></p>");
 	arr.push("<p><u>Option 4: Download credential as PDF</u></p>");
 	arr.push("<p><u>Option 5: Copy credential to clipboard</u></p>");
-	arr.push("<p style='overflow-wrap: break-word;'><i>"+JSON.stringify(credential_json)+"<i></p>");
+	arr.push("<p><button id='copy_btn' class='btn btn-primary' data-clipboard-text='"+JSON.stringify(credential_json)+"'><i class='fa-solid fa-copy icon-spacing'></i>Copy Credential JSON Text</button></p>");
+	// arr.push("<p style='overflow-wrap: break-word;'><i>"+JSON.stringify(credential_json)+"<i></p>");
 	arr.push("</div>");
 
 	return arr.join("");
@@ -314,6 +318,13 @@ function show_save_modal(header, body, data) {
 		// send to server
 		send_data_to_server($("#account_email").val(), select_template_id, data);
 	});
+
+	// event handler for copy button
+	var clipboard = new ClipboardJS('#copy_btn');
+	clipboard.on('success', function (e) {
+		navigator.clipboard.writeText(e.text);
+		alert('copied');
+	})
 }
 
 // ------------------------------
