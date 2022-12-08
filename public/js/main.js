@@ -163,7 +163,7 @@ function validate_form() {
 
 
 // ------------------------------
-async function send_data_to_server_email(account_email, credential_values) {
+async function send_data_to_server_email(account_email, template_id, credential_values) {
 	let data = {};
 
 	data['auth_token'] = auth_token;
@@ -171,15 +171,17 @@ async function send_data_to_server_email(account_email, credential_values) {
 	// emaill address to store credential against
 	data['account_email'] = account_email;
 
+	data['template_id'] = template_id;
+
 	// { field_name: value, field_name: value, ... }
-	data['credential'] = JSON.stringify(credential_values);
+	data['credential_values'] = JSON.stringify(credential_values);
 
 	console.log(data);
 
 	$.ajax({
 		dataType: 'json',
 		data: data,
-		url: `${ngrok_url}/emailCredential`,
+		url: `${ngrok_url}/createCredentialWithEmail`,
 		type: "POST",
 		success: function (result) {
 			console.log(result);
@@ -314,7 +316,7 @@ function show_save_modal(header, body, data) {
 	$("#send_email").on("click", function (e, target, value) {
 		console.log('send email')
 		// send to server
-		send_data_to_server_email($("#account_email").val(), data);
+		send_data_to_server_email($("#account_email").val(), select_template_id, data);
 	});
 
 	// event handler for copy button
