@@ -1,4 +1,4 @@
-const ngrok_url = "http://a647-105-224-28-203.ngrok.io";
+const ngrok_url = "http://0ee3-41-13-82-253.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkkKKnVybjp0cmluc2ljOndhbGxldHM6N1VwRmtIUEdvektWUWNFSHVLYVZ3TSIbdXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpDU0lSGjCTwP0t3e2BdAKnkSjJIJN1HMwlexAmvYBUGBzR_DEFkGZebj-IdHu48JKhMrjBdegiAA"
 let select_template_id = null;
 
@@ -163,7 +163,7 @@ function validate_form() {
 
 
 // ------------------------------
-async function send_data_to_server(account_email, template_id, credential_values) {
+async function send_data_to_server_email(account_email, credential_values) {
 	let data = {};
 
 	data['auth_token'] = auth_token;
@@ -171,17 +171,15 @@ async function send_data_to_server(account_email, template_id, credential_values
 	// emaill address to store credential against
 	data['account_email'] = account_email;
 
-	// get select option value
-	data['template_id'] = template_id;
-
 	// { field_name: value, field_name: value, ... }
-	data['credential_values'] = JSON.stringify(credential_values)
+	data['credential'] = JSON.stringify(credential_values);
 
+	console.log(data);
 
 	$.ajax({
 		dataType: 'json',
 		data: data,
-		url: `${ngrok_url}/createCredentialWithEmail`,
+		url: `${ngrok_url}/emailCredential`,
 		type: "POST",
 		success: function (result) {
 			console.log(result);
@@ -316,7 +314,7 @@ function show_save_modal(header, body, data) {
 	$("#send_email").on("click", function (e, target, value) {
 		console.log('send email')
 		// send to server
-		send_data_to_server($("#account_email").val(), select_template_id, data);
+		send_data_to_server_email($("#account_email").val(), data);
 	});
 
 	// event handler for copy button
